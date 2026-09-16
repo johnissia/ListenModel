@@ -7,15 +7,24 @@ export default function TrainingForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setState({ status: "sending", message: "Sending your request…" });
 
-    const form = new FormData(event.currentTarget);
-    const payload = Object.fromEntries(form.entries());
+    // Save the form element before the asynchronous request begins.
+    const formElement = event.currentTarget;
+
+    setState({
+      status: "sending",
+      message: "Sending your request…"
+    });
+
+    const formData = new FormData(formElement);
+    const payload = Object.fromEntries(formData.entries());
 
     try {
       const response = await fetch("/api/request-training", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload)
       });
 
@@ -25,7 +34,9 @@ export default function TrainingForm() {
         throw new Error(data?.error || "Unable to send your request.");
       }
 
-      event.currentTarget.reset();
+      // Clear the form only after a successful submission.
+      formElement.reset();
+
       setState({
         status: "success",
         message: "Thank you. Your training request has been received."
@@ -34,7 +45,7 @@ export default function TrainingForm() {
       setState({
         status: "error",
         message:
-          error.message ||
+          error?.message ||
           "We could not send your request. Please try again."
       });
     }
@@ -65,13 +76,19 @@ export default function TrainingForm() {
 
         <label>
           Group size
-          <input name="groupSize" type="text" placeholder="e.g., 12–20" />
+          <input
+            name="groupSize"
+            type="text"
+            placeholder="e.g., 12–20"
+          />
         </label>
 
         <label>
           Preferred format
           <select name="format" defaultValue="">
-            <option value="" disabled>Select one</option>
+            <option value="" disabled>
+              Select one
+            </option>
             <option>Virtual</option>
             <option>In person</option>
             <option>Either</option>
@@ -91,7 +108,12 @@ export default function TrainingForm() {
 
       <label className="honeypot" aria-hidden="true">
         Website
-        <input name="website" type="text" tabIndex="-1" autoComplete="off" />
+        <input
+          name="website"
+          type="text"
+          tabIndex="-1"
+          autoComplete="off"
+        />
       </label>
 
       <button
@@ -99,13 +121,17 @@ export default function TrainingForm() {
         type="submit"
         disabled={state.status === "sending"}
       >
-        {state.status === "sending" ? "Sending…" : "Request Training"}
+        {state.status === "sending"
+          ? "Sending…"
+          : "Request Training"}
       </button>
 
       {state.message && (
         <p
           className={`formMessage ${
-            state.status === "error" ? "formError" : "formSuccess"
+            state.status === "error"
+              ? "formError"
+              : "formSuccess"
           }`}
           role="status"
         >

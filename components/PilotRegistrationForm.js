@@ -7,27 +7,50 @@ export default function PilotRegistrationForm() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setState({ status: "sending", message: "Sending your registration…" });
 
-    const form = new FormData(event.currentTarget);
-    const payload = Object.fromEntries(form.entries());
+    // Save the form element before the asynchronous request begins.
+    const formElement = event.currentTarget;
+
+    setState({
+      status: "sending",
+      message: "Sending your registration…"
+    });
+
+    const formData = new FormData(formElement);
+    const payload = Object.fromEntries(formData.entries());
 
     try {
       const response = await fetch("/api/pilot-register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload)
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || "Unable to send registration.");
 
-      event.currentTarget.reset();
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Unable to send registration."
+        );
+      }
+
+      // Clear the form only after a successful submission.
+      formElement.reset();
+
       setState({
         status: "success",
-        message: "Thank you. Your Founding Pilot registration has been received."
+        message:
+          "Thank you. Your Founding Pilot registration has been received."
       });
     } catch (error) {
-      setState({ status: "error", message: error.message || "Please try again." });
+      setState({
+        status: "error",
+        message:
+          error?.message ||
+          "We could not send your registration. Please try again."
+      });
     }
   }
 
@@ -38,18 +61,31 @@ export default function PilotRegistrationForm() {
           Name
           <input name="name" type="text" required />
         </label>
+
         <label>
           Email
           <input name="email" type="email" required />
         </label>
+
         <label>
           Organization / role
-          <input name="organizationRole" type="text" placeholder="Optional" />
+          <input
+            name="organizationRole"
+            type="text"
+            placeholder="Optional"
+          />
         </label>
+
         <label>
           Participation type
-          <select name="participationType" defaultValue="" required>
-            <option value="" disabled>Select one</option>
+          <select
+            name="participationType"
+            defaultValue=""
+            required
+          >
+            <option value="" disabled>
+              Select one
+            </option>
             <option>Individual participant</option>
             <option>Team / organization representative</option>
             <option>Mentor / coach</option>
@@ -60,7 +96,8 @@ export default function PilotRegistrationForm() {
       </div>
 
       <label>
-        What would you most like to improve about how you listen or communicate?
+        What would you most like to improve about how you listen or
+        communicate?
         <textarea name="goal" rows="5" required />
       </label>
 
@@ -78,16 +115,21 @@ export default function PilotRegistrationForm() {
         <label>
           Preferred format
           <select name="format" defaultValue="">
-            <option value="" disabled>Select one</option>
+            <option value="" disabled>
+              Select one
+            </option>
             <option>Virtual</option>
             <option>In person</option>
             <option>Either</option>
           </select>
         </label>
+
         <label>
           Best general availability
           <select name="availability" defaultValue="">
-            <option value="" disabled>Select one</option>
+            <option value="" disabled>
+              Select one
+            </option>
             <option>Weekday mornings</option>
             <option>Weekday afternoons</option>
             <option>Weekday evenings</option>
@@ -98,21 +140,47 @@ export default function PilotRegistrationForm() {
       </div>
 
       <label className="consentRow">
-        <input name="feedbackConsent" type="checkbox" value="yes" required />
-        <span>I understand this is a founding pilot and agree to provide structured feedback about the learning experience.</span>
+        <input
+          name="feedbackConsent"
+          type="checkbox"
+          value="yes"
+          required
+        />
+        <span>
+          I understand this is a founding pilot and agree to provide
+          structured feedback about the learning experience.
+        </span>
       </label>
 
       <label className="honeypot" aria-hidden="true">
         Website
-        <input name="website" type="text" tabIndex="-1" autoComplete="off" />
+        <input
+          name="website"
+          type="text"
+          tabIndex="-1"
+          autoComplete="off"
+        />
       </label>
 
-      <button className="button primary" type="submit" disabled={state.status === "sending"}>
-        {state.status === "sending" ? "Sending…" : "Register Interest"}
+      <button
+        className="button primary"
+        type="submit"
+        disabled={state.status === "sending"}
+      >
+        {state.status === "sending"
+          ? "Sending…"
+          : "Register Interest"}
       </button>
 
       {state.message && (
-        <p className={`formMessage ${state.status === "error" ? "formError" : "formSuccess"}`} role="status">
+        <p
+          className={`formMessage ${
+            state.status === "error"
+              ? "formError"
+              : "formSuccess"
+          }`}
+          role="status"
+        >
           {state.message}
         </p>
       )}
